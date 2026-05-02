@@ -15,54 +15,194 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
+    :root {
+      --ghaba-green-dark: #1B4A33;
+      --ghaba-green-mid: #367C53;
+      --ghaba-green-light: #83D39A;
+      --ghaba-seed: #3F7D52;
+      --ghaba-bg-1: #DEEFE1;
+      --ghaba-bg-2: #CDE7D4;
+      --ghaba-bg-3: #B2D9BD;
+      --ghaba-text-main: #153326;
+      --ghaba-text-muted: #3e5f4c;
+      --ghaba-border-soft: rgba(255, 255, 255, 0.65);
+      --ghaba-shadow: 0 20px 60px rgba(26, 74, 52, 0.22);
+    }
+
     body {
-      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-family: 'Trebuchet MS', 'Segoe UI', system-ui, sans-serif;
       display: flex;
       flex-direction: column;
       height: 100vh;
-      background: #1a1a2e;
-      color: #eee;
+      background:
+        radial-gradient(circle at 8% 10%, rgba(131, 211, 154, 0.45), transparent 35%),
+        radial-gradient(circle at 92% 78%, rgba(63, 125, 82, 0.24), transparent 44%),
+        linear-gradient(130deg, var(--ghaba-bg-1) 0%, var(--ghaba-bg-2) 52%, var(--ghaba-bg-3) 100%);
+      color: var(--ghaba-text-main);
+      overflow: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.2;
+      background-image:
+        repeating-linear-gradient(45deg, rgba(27, 74, 51, 0.05) 0 2px, transparent 2px 18px),
+        repeating-linear-gradient(-35deg, rgba(63, 125, 82, 0.03) 0 2px, transparent 2px 24px);
+      z-index: -1;
+    }
+
+    #app-shell {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    .splash-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(circle at 16% 18%, rgba(255, 255, 255, 0.32), transparent 34%),
+        radial-gradient(circle at 86% 84%, rgba(255, 255, 255, 0.2), transparent 38%),
+        linear-gradient(145deg, var(--ghaba-bg-1) 0%, var(--ghaba-bg-2) 50%, var(--ghaba-bg-3) 100%);
+      transition: opacity 0.45s ease, visibility 0.45s ease;
+    }
+
+    .splash-screen.is-hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .splash-card {
+      width: min(88vw, 420px);
+      min-height: 300px;
+      margin: 0 24px;
+      padding: 34px 28px;
+      border-radius: 34px;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      background: linear-gradient(160deg, #83D39A 0%, #367C53 52%, #1B4A33 100%);
+      box-shadow: 0 18px 30px rgba(23, 55, 35, 0.24);
+      backdrop-filter: blur(4px);
+      display: grid;
+      place-items: center;
+      text-align: center;
+      transform: translateY(18px);
+      opacity: 0;
+      animation: splashReveal 900ms cubic-bezier(0.2, 0.74, 0.2, 1) 120ms forwards;
+    }
+
+    .splash-logo-wrap {
+      width: 86px;
+      height: 86px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      display: grid;
+      place-items: center;
+      box-shadow: 0 8px 18px rgba(27, 74, 51, 0.18);
+      overflow: hidden;
+      margin-bottom: 18px;
+    }
+
+    .splash-logo-wrap img {
+      width: 62%;
+      height: 62%;
+      object-fit: contain;
+      display: none;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.12));
+    }
+
+    .splash-fallback {
+      width: 62%;
+      height: 62%;
+      display: block;
+      transform: translateY(-1px);
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.14));
+    }
+
+    .splash-title {
+      color: #fff;
+      font-size: clamp(2.2rem, 8vw, 2.75rem);
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      line-height: 1.1;
+    }
+
+    .splash-subtitle {
+      margin-top: 8px;
+      color: rgba(255, 255, 255, 0.85);
+      font-size: clamp(0.9rem, 2.7vw, 0.95rem);
+      font-weight: 500;
+      letter-spacing: 0.075em;
+    }
+
+    .splash-loader {
+      width: 28px;
+      height: 28px;
+      margin-top: 18px;
+      border-radius: 50%;
+      border: 2.8px solid rgba(255, 255, 255, 0.32);
+      border-top-color: #ffffff;
+      animation: spin 0.95s linear infinite;
+    }
+
+    @keyframes splashReveal {
+      from { opacity: 0; transform: translateY(18px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
     }
 
     header {
-      background: #16213e;
+      background: linear-gradient(135deg, rgba(27, 74, 51, 0.92), rgba(54, 124, 83, 0.9));
       padding: 12px 20px;
       display: flex;
       align-items: center;
       gap: 16px;
-      border-bottom: 2px solid #0f3460;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.35);
+      box-shadow: 0 6px 14px rgba(27, 74, 51, 0.2);
     }
 
     header h1 {
       font-size: 1.2rem;
-      color: #e2c08b;
+      color: #f2fff4;
       font-weight: 600;
     }
 
     header .subtitle {
       font-size: 0.8rem;
-      color: #888;
+      color: rgba(239, 255, 241, 0.82);
     }
 
     .toolbar {
-      background: #16213e;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(229, 244, 232, 0.9));
       padding: 10px 20px;
       display: flex;
       align-items: center;
       gap: 12px;
       flex-wrap: wrap;
-      border-bottom: 1px solid #0f3460;
+      border-bottom: 1px solid rgba(27, 74, 51, 0.16);
     }
 
     .toolbar label {
       font-size: 0.85rem;
-      color: #aaa;
+      color: var(--ghaba-text-muted);
+      font-weight: 600;
     }
 
     .toolbar input[type="date"] {
-      background: #0f3460;
-      color: #eee;
-      border: 1px solid #444;
+      background: #f7fffa;
+      color: var(--ghaba-text-main);
+      border: 1px solid rgba(27, 74, 51, 0.25);
       border-radius: 6px;
       padding: 6px 10px;
       font-size: 0.85rem;
@@ -79,36 +219,37 @@
     }
 
     .btn-primary {
-      background: #e2b96f;
-      color: #1a1a2e;
+      background: linear-gradient(140deg, #367C53, #2f6d49);
+      color: #fff;
     }
-    .btn-primary:hover { background: #d4a84e; }
+    .btn-primary:hover { filter: brightness(1.06); }
     .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
 
     .btn-secondary {
-      background: #2d4a6e;
-      color: #ddd;
+      background: #e7f4ea;
+      color: var(--ghaba-green-dark);
+      border: 1px solid rgba(27, 74, 51, 0.22);
     }
-    .btn-secondary:hover { background: #3a6090; }
+    .btn-secondary:hover { background: #dcefe2; }
 
     .btn-success {
-      background: #27ae60;
+      background: linear-gradient(140deg, #3F7D52, #1B4A33);
       color: #fff;
     }
-    .btn-success:hover { background: #219a52; }
+    .btn-success:hover { filter: brightness(1.06); }
     .btn-success:disabled { opacity: 0.5; cursor: not-allowed; }
 
     .status-bar {
       font-size: 0.8rem;
       padding: 4px 10px;
       border-radius: 4px;
-      background: #0f3460;
-      color: #aaa;
+      background: rgba(54, 124, 83, 0.14);
+      color: #2f5f44;
     }
 
-    .status-bar.loading { color: #f39c12; }
-    .status-bar.error   { background: #5c1a1a; color: #e74c3c; }
-    .status-bar.success { background: #1a5c2a; color: #2ecc71; }
+    .status-bar.loading { color: #d28b10; }
+    .status-bar.error   { background: #fae5e5; color: #b53a3a; }
+    .status-bar.success { background: #dff4e4; color: #1b7447; }
 
     .main {
       display: flex;
@@ -122,8 +263,8 @@
 
     .sidebar {
       width: 320px;
-      background: #16213e;
-      border-left: 1px solid #0f3460;
+      background: linear-gradient(180deg, rgba(252, 255, 252, 0.85), rgba(226, 242, 231, 0.92));
+      border-left: 1px solid rgba(27, 74, 51, 0.14);
       overflow-y: auto;
       display: flex;
       flex-direction: column;
@@ -136,14 +277,15 @@
 
     .sidebar-section h3 {
       font-size: 0.9rem;
-      color: #e2c08b;
+      color: var(--ghaba-green-dark);
       margin-bottom: 10px;
       text-transform: uppercase;
       letter-spacing: 0.05em;
     }
 
     .result-card {
-      background: #0f3460;
+      background: linear-gradient(180deg, #f8fffa, #ebf7ee);
+      border: 1px solid rgba(54, 124, 83, 0.16);
       border-radius: 8px;
       padding: 12px;
       margin-bottom: 8px;
@@ -178,11 +320,11 @@
       justify-content: space-between;
       font-size: 0.78rem;
       padding: 3px 0;
-      border-bottom: 1px solid #1a3a6e;
+      border-bottom: 1px solid rgba(54, 124, 83, 0.12);
     }
 
-    .result-row span:first-child { color: #888; }
-    .result-row span:last-child  { color: #ddd; font-weight: 600; }
+    .result-row span:first-child { color: #4f6e5c; }
+    .result-row span:last-child  { color: #254837; font-weight: 700; }
 
     .prob-bar {
       margin-top: 8px;
@@ -201,7 +343,7 @@
     .prob-track {
       flex: 1;
       height: 6px;
-      background: #1a3a6e;
+      background: #d5eadb;
       border-radius: 3px;
       overflow: hidden;
     }
@@ -216,7 +358,7 @@
     .fill-intensif       { background: #e67e22; }
     .fill-hyper-intensif { background: #e74c3c; }
 
-    .prob-row span { width: 36px; text-align: right; color: #aaa; }
+    .prob-row span { width: 36px; text-align: right; color: #446454; }
 
     .legend {
       display: flex;
@@ -240,20 +382,104 @@
 
     .hint {
       font-size: 0.78rem;
-      color: #666;
+      color: #456352;
       line-height: 1.5;
     }
 
     .empty-state {
       text-align: center;
       padding: 30px 20px;
-      color: #555;
+      color: #4f6958;
     }
 
     .empty-state .icon { font-size: 2rem; margin-bottom: 8px; }
+
+    @media (max-width: 980px) {
+      .main {
+        flex-direction: column;
+      }
+
+      #map {
+        min-height: 48vh;
+      }
+
+      .sidebar {
+        width: 100%;
+        min-height: 40vh;
+      }
+    }
+
+    @media (max-width: 640px) {
+      header {
+        padding: 10px 14px;
+      }
+
+      header h1 {
+        font-size: 1rem;
+      }
+
+      .toolbar {
+        padding: 10px 12px;
+      }
+
+      .btn {
+        width: 100%;
+      }
+
+      .status-bar {
+        width: 100%;
+      }
+
+      .splash-card {
+        min-height: 270px;
+        border-radius: 28px;
+      }
+
+      .splash-logo-wrap {
+        width: 76px;
+        height: 76px;
+      }
+
+      .splash-title {
+        font-size: 2.35rem;
+      }
+    }
   </style>
 </head>
 <body>
+
+<div class="splash-screen" id="splashScreen" aria-label="GHABA Splash">
+  <div class="splash-card">
+    <div class="splash-logo-wrap" aria-hidden="true">
+      <img id="splashLogo" alt="GHABA logo" />
+      <svg class="splash-fallback" id="splashFallback" viewBox="0 0 120 120" role="img" aria-label="Leaf logo">
+        <defs>
+          <linearGradient id="leafGradMain" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.98"/>
+            <stop offset="62%" stop-color="#F3FFF6" stop-opacity="0.94"/>
+            <stop offset="100%" stop-color="#DDF8E5" stop-opacity="0.9"/>
+          </linearGradient>
+          <linearGradient id="leafGradShade" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.58"/>
+            <stop offset="100%" stop-color="#BFEFD0" stop-opacity="0.28"/>
+          </linearGradient>
+        </defs>
+        <path d="M105 18C79 15 56 24 41 40C24 58 20 84 28 106C29 109 33 110 36 108C38 107 39 105 39 102C39 88 44 74 53 63C64 48 81 37 103 31C106 30 108 27 107 24C107 21 106 19 105 18Z" fill="url(#leafGradMain)"/>
+        <path d="M101 28C81 34 63 45 51 61C42 74 38 88 38 102" fill="none" stroke="#ECFFF0" stroke-width="4" stroke-linecap="round"/>
+        <path d="M80 40C70 44 60 51 53 59" fill="none" stroke="#D4FDDD" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M88 53C74 59 62 69 55 82" fill="none" stroke="#D4FDDD" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M95 68C81 73 68 83 60 95" fill="none" stroke="#D4FDDD" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M103 31C81 37 64 48 53 63C44 74 39 88 39 102C45 91 56 83 68 78C83 72 96 61 103 45C105 40 106 35 103 31Z" fill="url(#leafGradShade)"/>
+        <ellipse cx="45" cy="96" rx="7" ry="3.2" fill="#E9FFF0" fill-opacity="0.45"/>
+      </svg>
+    </div>
+    <h2 class="splash-title">GHABA</h2>
+    <p class="splash-subtitle">Welcome to Ghaba</p>
+    <div class="splash-loader" aria-hidden="true"></div>
+  </div>
+</div>
+
+<div id="app-shell">
 
 <header>
   <div>
@@ -326,11 +552,48 @@
   </div>
 </div>
 
+</div>
+
 <script>
 const API_BASE = "http://localhost:8000";
 let drawnPolygon = null;
 let resultLayer  = null;
 let lastGeojson  = null;
+
+const splashScreen = document.getElementById("splashScreen");
+const splashLogo = document.getElementById("splashLogo");
+const splashFallback = document.getElementById("splashFallback");
+
+const logoCandidates = [
+  "logo.svg",
+  "logo.png",
+  "assets/logo.svg",
+  "assets/logo.png",
+  "images/logo.svg",
+  "images/logo.png",
+  "../logo.svg",
+  "../logo.png",
+];
+
+function tryLoadSplashLogo(candidates) {
+  const candidate = candidates.shift();
+  if (!candidate) return;
+
+  const img = new Image();
+  img.onload = () => {
+    splashLogo.src = candidate;
+    splashLogo.style.display = "block";
+    splashFallback.style.display = "none";
+  };
+  img.onerror = () => tryLoadSplashLogo(candidates);
+  img.src = candidate;
+}
+
+tryLoadSplashLogo([...logoCandidates]);
+
+setTimeout(() => {
+  splashScreen.classList.add("is-hidden");
+}, 2500);
 
 // ── Carte Leaflet ──────────────────────────────────────
 const map = L.map("map", {
@@ -349,7 +612,7 @@ const drawnItems = new L.FeatureGroup().addTo(map);
 const drawControl = new L.Control.Draw({
   edit: { featureGroup: drawnItems, edit: false, remove: false },
   draw: {
-    polygon:   { shapeOptions: { color: "#e2c08b", fillOpacity: 0.1 } },
+    polygon:   { shapeOptions: { color: "#367C53", fillOpacity: 0.12 } },
     rectangle: false, circle: false, marker: false,
     polyline:  false, circlemarker: false,
   },
