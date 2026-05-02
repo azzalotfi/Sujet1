@@ -1,0 +1,21 @@
+{
+  "parcel_id": "parcel_1777666572107_7pdad",
+  "systeme": "extensif",
+  "source": "openeo-copernicus",
+  "temporal_extent": [
+    "2025-05-01",
+    "2025-06-30"
+  ],
+  "max_cloud_cover": 15,
+  "bands": [
+    "B02",
+    "B03",
+    "B04",
+    "B08",
+    "B11"
+  ],
+  "shape": [
+    332,
+    647
+  ]
+}

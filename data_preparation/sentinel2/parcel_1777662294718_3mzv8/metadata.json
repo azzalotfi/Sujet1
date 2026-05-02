@@ -1,0 +1,18 @@
+{
+  "parcel_id": "parcel_1777662294718_3mzv8",
+  "systeme": "intensif",
+  "scene_id": "S2B_32SNE_20250613_1_L2A",
+  "scene_date": "2025-06-13",
+  "cloud_cover_pct": 3.5e-05,
+  "bands_downloaded": [
+    "B02",
+    "B03",
+    "B04",
+    "B08",
+    "B11"
+  ],
+  "shape": [
+    286,
+    147
+  ]
+}

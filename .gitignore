@@ -1,0 +1,22 @@
+.venv/
+node_modules/
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.DS_Store
+Thumbs.db
+
+# Local runtime artifacts
+*.log
+*.tmp
+*.temp
+
+# Python environment markers
+.Python
+env/
+venv/

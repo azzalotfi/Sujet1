@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Détection Oliveraies — Tunisie</title>
+
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      background: #1a1a2e;
+      color: #eee;
+    }
+
+    header {
+      background: #16213e;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      border-bottom: 2px solid #0f3460;
+    }
+
+    header h1 {
+      font-size: 1.2rem;
+      color: #e2c08b;
+      font-weight: 600;
+    }
+
+    header .subtitle {
+      font-size: 0.8rem;
+      color: #888;
+    }
+
+    .toolbar {
+      background: #16213e;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      border-bottom: 1px solid #0f3460;
+    }
+
+    .toolbar label {
+      font-size: 0.85rem;
+      color: #aaa;
+    }
+
+    .toolbar input[type="date"] {
+      background: #0f3460;
+      color: #eee;
+      border: 1px solid #444;
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 0.85rem;
+    }
+
+    .btn {
+      padding: 8px 18px;
+      border-radius: 6px;
+      border: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: #e2b96f;
+      color: #1a1a2e;
+    }
+    .btn-primary:hover { background: #d4a84e; }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-secondary {
+      background: #2d4a6e;
+      color: #ddd;
+    }
+    .btn-secondary:hover { background: #3a6090; }
+
+    .btn-success {
+      background: #27ae60;
+      color: #fff;
+    }
+    .btn-success:hover { background: #219a52; }
+    .btn-success:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .status-bar {
+      font-size: 0.8rem;
+      padding: 4px 10px;
+      border-radius: 4px;
+      background: #0f3460;
+      color: #aaa;
+    }
+
+    .status-bar.loading { color: #f39c12; }
+    .status-bar.error   { background: #5c1a1a; color: #e74c3c; }
+    .status-bar.success { background: #1a5c2a; color: #2ecc71; }
+
+    .main {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    #map {
+      flex: 1;
+    }
+
+    .sidebar {
+      width: 320px;
+      background: #16213e;
+      border-left: 1px solid #0f3460;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar-section {
+      padding: 16px;
+      border-bottom: 1px solid #0f3460;
+    }
+
+    .sidebar-section h3 {
+      font-size: 0.9rem;
+      color: #e2c08b;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .result-card {
+      background: #0f3460;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 8px;
+    }
+
+    .result-card .classe {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .classe-badge {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .badge-extensif      { background: #27ae60; color: #fff; }
+    .badge-intensif      { background: #e67e22; color: #fff; }
+    .badge-hyper-intensif{ background: #e74c3c; color: #fff; }
+    .badge-inconnu       { background: #7f8c8d; color: #fff; }
+
+    .result-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      padding: 3px 0;
+      border-bottom: 1px solid #1a3a6e;
+    }
+
+    .result-row span:first-child { color: #888; }
+    .result-row span:last-child  { color: #ddd; font-weight: 600; }
+
+    .prob-bar {
+      margin-top: 8px;
+    }
+
+    .prob-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 4px;
+      font-size: 0.75rem;
+    }
+
+    .prob-row label { width: 100px; color: #888; }
+
+    .prob-track {
+      flex: 1;
+      height: 6px;
+      background: #1a3a6e;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .prob-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.4s;
+    }
+
+    .fill-extensif       { background: #27ae60; }
+    .fill-intensif       { background: #e67e22; }
+    .fill-hyper-intensif { background: #e74c3c; }
+
+    .prob-row span { width: 36px; text-align: right; color: #aaa; }
+
+    .legend {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.8rem;
+    }
+
+    .legend-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .hint {
+      font-size: 0.78rem;
+      color: #666;
+      line-height: 1.5;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 30px 20px;
+      color: #555;
+    }
+
+    .empty-state .icon { font-size: 2rem; margin-bottom: 8px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>🫒 Détection Oliveraies — Tunisie</h1>
+    <div class="subtitle">Segmentation Sentinel-2 + Classification XGBoost</div>
+  </div>
+</header>
+
+<div class="toolbar">
+  <label for="datePicker">Date de référence :</label>
+  <input type="date" id="datePicker" value="2025-06-15" min="2020-01-01" max="2030-12-31" />
+
+  <button class="btn btn-primary" id="btnAnalyse" disabled>
+    🔍 Analyser la zone
+  </button>
+
+  <button class="btn btn-secondary" id="btnClear">
+    🗑 Effacer
+  </button>
+
+  <button class="btn btn-success" id="btnExport" disabled>
+    ⬇ Exporter GeoJSON
+  </button>
+
+  <span class="status-bar" id="statusBar">Dessinez un polygone sur la carte</span>
+</div>
+
+<div class="main">
+  <div id="map"></div>
+
+  <div class="sidebar">
+    <div class="sidebar-section">
+      <h3>Résultats</h3>
+      <div id="resultsContainer">
+        <div class="empty-state">
+          <div class="icon">🗺</div>
+          <div>Dessinez un périmètre sur la carte, puis cliquez sur <strong>Analyser la zone</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <h3>Légende</h3>
+      <div class="legend">
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#27ae60"></div>
+          <span>Extensif — faible densité, peu d'irrigation</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#f39c12"></div>
+          <span>Intensif — densité moyenne, semi-irrigué</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#e74c3c"></div>
+          <span>Hyper-intensif — haute densité, irrigué</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <h3>Instructions</h3>
+      <div class="hint">
+        1. Zoomez sur une région tunisienne avec des oliviers.<br/>
+        2. Cliquez sur l'outil <strong>polygone</strong> dans la barre de dessin.<br/>
+        3. Tracez le contour de la zone à analyser.<br/>
+        4. Cliquez sur <strong>Analyser la zone</strong>.<br/>
+        5. Les résultats apparaissent ici et le GeoJSON est téléchargeable.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API_BASE = "http://localhost:8000";
+let drawnPolygon = null;
+let resultLayer  = null;
+let lastGeojson  = null;
+
+// ── Carte Leaflet ──────────────────────────────────────
+const map = L.map("map", {
+  center: [35.0, 9.5],
+  zoom: 8,
+});
+
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  attribution: "© OpenStreetMap contributors",
+  maxZoom: 18,
+}).addTo(map);
+
+// ── Calque pour le dessin ──────────────────────────────
+const drawnItems = new L.FeatureGroup().addTo(map);
+
+const drawControl = new L.Control.Draw({
+  edit: { featureGroup: drawnItems, edit: false, remove: false },
+  draw: {
+    polygon:   { shapeOptions: { color: "#e2c08b", fillOpacity: 0.1 } },
+    rectangle: false, circle: false, marker: false,
+    polyline:  false, circlemarker: false,
+  },
+});
+map.addControl(drawControl);
+
+map.on(L.Draw.Event.CREATED, (e) => {
+  drawnItems.clearLayers();
+  drawnItems.addLayer(e.layer);
+  drawnPolygon = e.layer.toGeoJSON().geometry;
+  document.getElementById("btnAnalyse").disabled = false;
+  setStatus("Polygone dessiné — cliquez sur Analyser la zone", "");
+});
+
+// ── Boutons ────────────────────────────────────────────
+document.getElementById("btnClear").addEventListener("click", () => {
+  drawnItems.clearLayers();
+  drawnPolygon = null;
+  lastGeojson  = null;
+  if (resultLayer) { map.removeLayer(resultLayer); resultLayer = null; }
+  document.getElementById("btnAnalyse").disabled = true;
+  document.getElementById("btnExport").disabled  = true;
+  document.getElementById("resultsContainer").innerHTML = `
+    <div class="empty-state">
+      <div class="icon">🗺</div>
+      <div>Dessinez un périmètre sur la carte, puis cliquez sur <strong>Analyser la zone</strong></div>
+    </div>`;
+  setStatus("Dessinez un polygone sur la carte", "");
+});
+
+document.getElementById("btnAnalyse").addEventListener("click", analyzeZone);
+
+document.getElementById("btnExport").addEventListener("click", () => {
+  if (!lastGeojson) return;
+  const blob = new Blob([JSON.stringify(lastGeojson, null, 2)], { type: "application/json" });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement("a");
+  a.href     = url;
+  a.download = "oliveraies_detectees.geojson";
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+// ── Analyse principale ─────────────────────────────────
+async function analyzeZone() {
+  if (!drawnPolygon) return;
+
+  const date = document.getElementById("datePicker").value;
+  if (!date) { setStatus("Sélectionnez une date", "error"); return; }
+
+  setStatus("⏳ Recherche de l'image Sentinel-2...", "loading");
+  document.getElementById("btnAnalyse").disabled = true;
+
+  try {
+    const response = await axios.post(`${API_BASE}/api/cartographier`, {
+      polygone_perimetre: drawnPolygon,
+      date: date,
+    }, { timeout: 600000 });
+
+    const geojson = response.data;
+    lastGeojson   = geojson;
+
+    // Afficher sur la carte
+    if (resultLayer) map.removeLayer(resultLayer);
+    resultLayer = L.geoJSON(geojson, {
+      style: (feature) => ({
+        color:       feature.properties.couleur,
+        weight:      3,
+        fillColor:   feature.properties.couleur,
+        fillOpacity: 0.35,
+      }),
+      onEachFeature: (feature, layer) => {
+        const p = feature.properties;
+        layer.bindPopup(`
+          <b>${p.classe.toUpperCase()}</b><br/>
+          Surface : ${p.area_ha} ha<br/>
+          NDVI : ${p.ndvi_mean ?? "N/A"}<br/>
+          Image : ${p.scene_date} (${p.cloud_cover_pct}% nuages)
+        `);
+      }
+    }).addTo(map);
+
+    // Afficher dans la sidebar
+    displayResults(geojson);
+
+    document.getElementById("btnExport").disabled = false;
+    setStatus(`✅ Analyse terminée — ${geojson.features.length} zone(s) détectée(s)`, "success");
+
+  } catch (err) {
+    const msg = err.response?.data?.detail || err.message || "Erreur inconnue";
+    setStatus(`❌ ${msg}`, "error");
+    console.error(err);
+  } finally {
+    document.getElementById("btnAnalyse").disabled = false;
+  }
+}
+
+function displayResults(geojson) {
+  const container = document.getElementById("resultsContainer");
+  container.innerHTML = "";
+
+  if (!geojson.features || geojson.features.length === 0) {
+    container.innerHTML = `<div class="empty-state"><div>Aucune zone détectée</div></div>`;
+    return;
+  }
+
+  for (const feat of geojson.features) {
+    const p = feat.properties;
+    const badgeClass = `badge-${p.classe.replace(" ", "-")}` ;
+    const probs = p.probabilites || {};
+
+    const card = document.createElement("div");
+    card.className = "result-card";
+    card.innerHTML = `
+      <div class="classe">
+        <span class="classe-badge ${badgeClass}">${p.classe}</span>
+      </div>
+      <div class="result-row">
+        <span>Surface</span><span>${p.area_ha} ha</span>
+      </div>
+      <div class="result-row">
+        <span>NDVI moyen</span><span>${p.ndvi_mean ?? "N/A"}</span>
+      </div>
+      <div class="result-row">
+        <span>Image Sentinel</span><span>${p.scene_date}</span>
+      </div>
+      <div class="result-row">
+        <span>Couverture nuages</span><span>${p.cloud_cover_pct}%</span>
+      </div>
+      ${buildProbBars(probs)}
+    `;
+    container.appendChild(card);
+  }
+}
+
+function buildProbBars(probs) {
+  if (!probs || Object.keys(probs).length === 0) return "";
+  const entries = [
+    ["extensif",       "fill-extensif"],
+    ["intensif",       "fill-intensif"],
+    ["hyper-intensif", "fill-hyper-intensif"],
+  ].filter(([k]) => k in probs);
+
+  const rows = entries.map(([label, fillClass]) => {
+    const pct = Math.round((probs[label] || 0) * 100);
+    return `
+      <div class="prob-row">
+        <label>${label}</label>
+        <div class="prob-track">
+          <div class="prob-fill ${fillClass}" style="width:${pct}%"></div>
+        </div>
+        <span>${pct}%</span>
+      </div>`;
+  }).join("");
+
+  return `<div class="prob-bar">${rows}</div>`;
+}
+
+function setStatus(msg, type) {
+  const el = document.getElementById("statusBar");
+  el.textContent = msg;
+  el.className   = `status-bar ${type}`;
+}
+</script>
+</body>
+</html>

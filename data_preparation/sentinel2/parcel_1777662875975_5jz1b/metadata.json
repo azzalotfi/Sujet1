@@ -1,0 +1,21 @@
+{
+  "parcel_id": "parcel_1777662875975_5jz1b",
+  "systeme": "intensif",
+  "source": "openeo-copernicus",
+  "temporal_extent": [
+    "2025-05-01",
+    "2025-06-30"
+  ],
+  "max_cloud_cover": 15,
+  "bands": [
+    "B02",
+    "B03",
+    "B04",
+    "B08",
+    "B11"
+  ],
+  "shape": [
+    214,
+    157
+  ]
+}

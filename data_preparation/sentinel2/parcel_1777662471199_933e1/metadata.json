@@ -1,0 +1,18 @@
+{
+  "parcel_id": "parcel_1777662471199_933e1",
+  "systeme": "intensif",
+  "scene_id": "S2A_32SMD_20250603_1_L2A",
+  "scene_date": "2025-06-03",
+  "cloud_cover_pct": 0.000156,
+  "bands_downloaded": [
+    "B02",
+    "B03",
+    "B04",
+    "B08",
+    "B11"
+  ],
+  "shape": [
+    120,
+    125
+  ]
+}

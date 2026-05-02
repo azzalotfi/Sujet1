@@ -1,0 +1,18 @@
+{
+  "parcel_id": "parcel_1777662108262_dhxlg",
+  "systeme": "intensif",
+  "scene_id": "S2A_32SNF_20250531_0_L2A",
+  "scene_date": "2025-05-31",
+  "cloud_cover_pct": 0.003134,
+  "bands_downloaded": [
+    "B02",
+    "B03",
+    "B04",
+    "B08",
+    "B11"
+  ],
+  "shape": [
+    279,
+    252
+  ]
+}
